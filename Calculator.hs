@@ -1,29 +1,49 @@
 module Calculator where
 
+
 import Data.Char (isDigit)
 
 
 
+data Op = Inc
+        | Dec
+        | Mul
+        | Div
+        deriving (Show);
 
 data Tokens = Number Float
             | Open
             | Close
-            | Exp Char
+            | Exp Op
             | Eof
-            deriving (Show, Read, Eq);
+            deriving (Show);
+
+data AST = NumNode Float
+         | OpNode Op AST AST
+         deriving (Show);
+
 
 
 isExpr :: Char -> Bool
 isExpr = flip elem "+-*/";
 
 
-parse :: String -> [Tokens]
-parse [] = [Eof]
-parse ('(':xs) = Open:parse xs
-parse (')':xs) = Close:parse xs
-parse (x:xs)
+getOp :: Char -> Op
+getOp x = case x of
+  '+' -> Inc
+  '-' -> Dec
+  '*' -> Mul
+  '/' -> Div
+  _   -> error "Unexpected error while parsing operation.";
+
+
+lexer :: String -> [Tokens]
+lexer ('(':xs) = Open:lexer xs
+lexer (')':xs) = Close:lexer xs
+lexer (x:xs)
   | isDigit x || x == '.' = let (num, rest) = span (\ch -> isDigit ch || ch == '.') (x:xs)
-                            in Number (read num):parse rest
-  | isExpr x = Exp x:parse xs
-  | x == ' ' = parse xs
-  | otherwise = parse xs
+                            in Number (read num):lexer rest
+  | isExpr x = Exp (getOp x):lexer xs
+  | x == ' ' = lexer xs
+  | otherwise = lexer xs;
+lexer [] = [Eof]
