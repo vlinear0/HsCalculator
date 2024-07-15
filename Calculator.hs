@@ -4,7 +4,6 @@ module Calculator where
 import Data.Char (isDigit)
 
 
-
 data Op = Inc
         | Dec
         | Mul
@@ -80,7 +79,6 @@ parseFac (Open:ts) = let (ast, rest) = parseExpr ts
                       (Close:ts') -> (ast, ts')
                       _           -> error "Unclosed branch!"
 parseFac ts = error $ "Exception while parsing next tokens: " ++ show ts;
-
 
 
 parseTerm' :: AST -> [Tokens] -> (AST, [Tokens])
