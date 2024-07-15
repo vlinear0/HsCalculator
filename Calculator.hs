@@ -28,6 +28,10 @@ isExpr :: Char -> Bool
 isExpr = flip elem "+-*/";
 
 
+isNum :: Char -> Bool
+isNum x = isDigit x || x == '.';
+
+
 getOp :: Char -> Op
 getOp x = case x of
   '+' -> Inc
@@ -42,7 +46,7 @@ lexer ('(':xs) = Open:lexer xs
 lexer (')':xs) = Close:lexer xs
 lexer (x:xs)
   | x == ' ' = lexer xs
-  | isDigit x || x == '.' = let (num, rest) = span (\ch -> isDigit ch || ch == '.') (x:xs)
+  | isDigit x || x == '.' = let (num, rest) = span (isNum) (x:xs)
                             in Number (read num):lexer rest
   | isExpr x = Exp (getOp x):lexer xs
   | otherwise = lexer xs;
@@ -99,12 +103,9 @@ parseExpr' lhs (Exp o:ts) =
 parseExpr' ast ts = (ast, ts)
 
 
--- TODO: parseExpr'
-
 
 
 {-
-
     Процесс работы програмы на примере "2 + 2":
 
     1. Вызываем parseToAst "2 + 2"
