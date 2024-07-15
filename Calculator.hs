@@ -80,15 +80,23 @@ parseFac ts = error $ "Exception while parsing next tokens: " ++ show ts;
 
 
 parseTerm' :: AST -> [Tokens] -> (AST, [Tokens])
-parseTerm' lhs (Exp Mul:ts) = let (rhs, rest) = parseFac ts
-                                  nLhs = OpNode Mul lhs rhs
-                              in parseTerm' nLhs rest
-parseTerm' lhs (Exp Div:ts) = let (rhs, rest) = parseFac ts
-                                  nLhs = OpNode Div lhs rhs
-                              in parseTerm' nLhs rest
+parseTerm' lhs (Exp Mul:ts) =
+  let (rhs, rest) = parseFac ts
+      nLhs = OpNode Mul lhs rhs
+  in parseTerm' nLhs rest
+parseTerm' lhs (Exp Div:ts) =
+  let (rhs, rest) = parseFac ts
+      nLhs = OpNode Div lhs rhs
+  in parseTerm' nLhs rest
 parseTerm' lhs ts = (lhs, ts)
 
 
+parseExpr' :: AST -> [Tokens] -> (AST, [Tokens])
+parseExpr' lhs (Exp o:ts) =
+  let (rhs, rest) = parseTerm ts
+      nLhs = OpNode o lhs rhs
+  in parseExpr' nLhs rest
+parseExpr' ast ts = (ast, ts)
 
 
 -- TODO: parseExpr'
