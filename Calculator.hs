@@ -41,12 +41,45 @@ lexer :: String -> [Tokens]
 lexer ('(':xs) = Open:lexer xs
 lexer (')':xs) = Close:lexer xs
 lexer (x:xs)
+  | x == ' ' = lexer xs
   | isDigit x || x == '.' = let (num, rest) = span (\ch -> isDigit ch || ch == '.') (x:xs)
                             in Number (read num):lexer rest
   | isExpr x = Exp (getOp x):lexer xs
-  | x == ' ' = lexer xs
   | otherwise = lexer xs;
 lexer [] = [Eof]
+
+
+parseToAst :: String -> AST
+parseToAst t =
+  let (ast, rest) = parseExpr $ lexer t
+  in case rest of
+    [Eof] -> ast
+    _     -> error "Unexpected error while parsing expression: ";
+
+
+parseExpr :: [Tokens] -> (AST, [Tokens])
+parseExpr t =
+  let (term, rest) = parseTerm t
+  in parseExpr' term rest
+
+
+parseTerm :: [Tokens] -> (AST, [Tokens])
+parseTerm t =
+  let (fac, rest) = parseFac t
+  in parseTerm' fac rest
+
+
+parseFac :: [Tokens] -> (AST, [Tokens])
+parseFac (Number t:ts) = (NumNode t, ts)
+parseFac (Open:ts) = let (ast, rest) = parseExpr ts
+                     in case rest of
+                      (Close:ts') -> (ast, ts')
+                      _           -> error "Unclosed branch!"
+parseFac ts = error $ "Exception while parsing next tokens: " ++ show ts;
+
+
+-- TODO: parseExpr'
+-- TODO: parseTerm'
 
 
 
