@@ -78,8 +78,20 @@ parseFac (Open:ts) = let (ast, rest) = parseExpr ts
 parseFac ts = error $ "Exception while parsing next tokens: " ++ show ts;
 
 
+
+parseTerm' :: AST -> [Tokens] -> (AST, [Tokens])
+parseTerm' lhs (Exp Mul:ts) = let (rhs, rest) = parseFac ts
+                                  nLhs = OpNode Mul lhs rhs
+                              in parseTerm' nLhs rest
+parseTerm' lhs (Exp Div:ts) = let (rhs, rest) = parseFac ts
+                                  nLhs = OpNode Div lhs rhs
+                              in parseTerm' nLhs rest
+parseTerm' lhs ts = (lhs, ts)
+
+
+
+
 -- TODO: parseExpr'
--- TODO: parseTerm'
 
 
 
