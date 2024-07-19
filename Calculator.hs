@@ -3,7 +3,6 @@ module Calculator where
 
 import Data.Char (isDigit)
 
-
 data Op = Inc
         | Dec
         | Mul
@@ -21,15 +20,11 @@ data AST = NumNode Float
          | OpNode Op AST AST
          deriving (Show);
 
-
-
 isExpr :: Char -> Bool
 isExpr = flip elem "+-*/";
 
-
 isNum :: Char -> Bool
 isNum x = isDigit x || x == '.';
-
 
 getOp :: Char -> Op
 getOp x = case x of
@@ -38,7 +33,6 @@ getOp x = case x of
   '*' -> Mul
   '/' -> Div
   _   -> error "Unexpected error while parsing operation.";
-
 
 lexer :: String -> [Tokens]
 lexer ('(':xs) = Open:lexer xs
@@ -51,7 +45,6 @@ lexer (x:xs)
   | otherwise = lexer xs;
 lexer [] = [Eof]
 
-
 parseToAst :: String -> AST
 parseToAst t =
   let (ast, rest) = parseExpr $ lexer t
@@ -59,18 +52,15 @@ parseToAst t =
     [Eof] -> ast
     _     -> error "Unexpected error while parsing expression: ";
 
-
 parseExpr :: [Tokens] -> (AST, [Tokens])
 parseExpr t =
   let (term, rest) = parseTerm t
   in parseExpr' term rest
 
-
 parseTerm :: [Tokens] -> (AST, [Tokens])
 parseTerm t =
   let (fac, rest) = parseFac t
   in parseTerm' fac rest
-
 
 parseFac :: [Tokens] -> (AST, [Tokens])
 parseFac (Number t:ts) = (NumNode t, ts)
@@ -79,7 +69,6 @@ parseFac (Open:ts) = let (ast, rest) = parseExpr ts
                       (Close:ts') -> (ast, ts')
                       _           -> error "Unclosed branch!"
 parseFac ts = error $ "Exception while parsing next tokens: " ++ show ts;
-
 
 parseTerm' :: AST -> [Tokens] -> (AST, [Tokens])
 parseTerm' lhs (Exp Mul:ts) =
@@ -92,14 +81,12 @@ parseTerm' lhs (Exp Div:ts) =
   in parseTerm' nLhs rest
 parseTerm' lhs ts = (lhs, ts)
 
-
 parseExpr' :: AST -> [Tokens] -> (AST, [Tokens])
 parseExpr' lhs (Exp o:ts) =
   let (rhs, rest) = parseTerm ts
       nLhs = OpNode o lhs rhs
   in parseExpr' nLhs rest
 parseExpr' ast ts = (ast, ts)
-
 
 calc :: AST -> Float
 calc (NumNode n) = n
