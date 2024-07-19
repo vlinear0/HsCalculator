@@ -101,6 +101,18 @@ parseExpr' lhs (Exp o:ts) =
 parseExpr' ast ts = (ast, ts)
 
 
+calc :: AST -> Float
+calc (NumNode n) = n
+calc (OpNode op l r) =
+  let l' = calc l
+      r' = calc r
+  in case op of
+    Inc -> (+) l' r'
+    Dec -> (-) l' r'
+    Mul -> (*) l' r'
+    Div -> (/) l' r'
+
+
 
 
 {-
